@@ -1,0 +1,220 @@
+﻿@model IEnumerable<Phase4.Models.Packages>
+
+@{
+    ViewData["Title"] = "Cart";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<div class="container">
+    <div class="row">
+        @foreach (var item in Model)
+        {
+            var availableCount = item.TotalCount - item.UsedCount;
+            var cardClass = item.Luxuary ? "card-luxury" : "card-basic";
+
+            <div class="col-md-4 mb-4">
+                <div class="card @cardClass">
+                    <div class="remove-btn-container">
+                        <form asp-action="RemoveFromCart" method="get" class="d-inline">
+                            <input type="hidden" name="PackageID" value="@item.PackageID" />
+                            <input type="hidden" name="userid" value="@ViewBag.UserId" />
+                            <button type="submit" class="btn btn-remove"><i class="fas fa-trash"></i></button>
+                        </form>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">@item.FlightName</h5>
+                        <p class="card-text">
+                            @if (!string.IsNullOrEmpty(item.From))
+                            {
+                                <strong>From:</strong> @item.From
+                                <br />
+                            }
+                            @if (!string.IsNullOrEmpty(item.To))
+                            {
+                                <strong>To:</strong> @item.To
+                                <br />
+                            }
+                            @if (!string.IsNullOrEmpty(item.FlightType))
+                            {
+                                <strong>Flight Type:</strong> @item.FlightType
+                                <br />
+                            }
+                            @if (!string.IsNullOrEmpty(item.AccName))
+                            {
+                                <strong>Accommodation Name:</strong> @item.AccName
+                                <br />
+                            }
+                            @if (!string.IsNullOrEmpty(item.AccType))
+                            {
+                                <strong>Accommodation Type:</strong> @item.AccType
+                                <br />
+                            }
+                            @if (!string.IsNullOrEmpty(item.AccAddress))
+                            {
+                                <strong>Accommodation Address:</strong> @item.AccAddress
+                                <br />
+                            }
+                            @if (!string.IsNullOrEmpty(item.SSNames))
+                            {
+                                <strong>Special Services:</strong> @item.SSNames
+                                <br />
+                            }
+
+                            @if (item.AdminPrice > 0)
+                            {
+                                <strong>Package Price:</strong> @item.AdminPrice
+                                <br />
+                            }
+                            <strong>Available Count:</strong> @availableCount
+                        </p>
+                        <form asp-action="BuyPackage" method="post" class="d-inline buy-package-form">
+                            <input type="hidden" name="packageId" value="@item.PackageID" />
+                            <input type="hidden" name="userId" value="@ViewBag.UserId" />
+                            <input type="hidden" name="packagePrice" value="@item.PackagePrice" />
+                            <input type="hidden" name="adminPrice" value="@item.AdminPrice" />
+
+                            <div class="input-group mt-2" data-max-count="@availableCount">
+                                <button type="button" class="btn btn-decrement custom-button">-</button>
+                                <input type="number" id="count-@item.PackageID" name="count" class="form-control form-control-sm text-center" value="1" min="1" max="@availableCount" />
+                                <button type="button" class="btn btn-increment custom-button">+</button>
+                            </div>
+                            <button type="submit" class="btn btn-buy custom-button mt-2">Buy Package</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            document.querySelectorAll('.btn-increment').forEach(button => {
+                button.addEventListener('click', function () {
+                    var input = this.previousElementSibling;
+                    var maxCount = parseInt(this.closest('.input-group').getAttribute('data-max-count'));
+                    var currentValue = parseInt(input.value);
+                    if (currentValue < maxCount) {
+                        input.value = currentValue + 1;
+                    }
+                });
+            });
+
+            document.querySelectorAll('.btn-decrement').forEach(button => {
+                button.addEventListener('click', function () {
+                    var input = this.nextElementSibling;
+                    var currentValue = parseInt(input.value);
+                    if (currentValue > 1) {
+                        input.value = currentValue - 1;
+                    }
+                });
+            });
+        });
+    </script>
+}
+
+<style>
+    .card {
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        padding: 1rem;
+        margin-bottom: 1rem;
+        transition: z-index 0.3s, box-shadow 0.3s;
+    }
+
+    .card-luxury {
+        background-color: #f9f9e3; /* Light gold for luxury */
+    }
+
+    .card-basic {
+        background-color: #f0f0f0; /* Light grey for basic */
+    }
+
+    .card:hover {
+        z-index: 10; /* Increase z-index to bring card to front */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .remove-btn-container {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        z-index: 1; /* Ensure it is above other content */
+    }
+
+    .btn-remove {
+        background-color: #dc3545; /* Red for remove button */
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background-color 0.3s;
+    }
+
+        .btn-remove:hover {
+            background-color: #c82333;
+        }
+
+        .btn-remove i {
+            font-size: 1.2rem;
+        }
+
+    .buy-package-form .form-label {
+        font-size: 0.9rem;
+        margin-right: 5px;
+    }
+
+    .buy-package-form .form-control {
+        display: inline-block;
+        width: 70px;
+        margin-right: 10px;
+    }
+
+    .input-group {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .input-group .btn-decrement, .input-group .btn-increment {
+            background-color: #f0f0f0; /* Neutral color for buttons */
+            border: 1px solid #ddd; /* Light border */
+            color: #333; /* Darker text color */
+            font-size: 1.2rem;
+            height: 40px;
+            width: 40px;
+        }
+
+            .input-group .btn-decrement:hover, .input-group .btn-increment:hover {
+                background-color: #e0e0e0; /* Slightly darker on hover */
+                border-color: #ccc; /* Darker border on hover */
+            }
+
+        .input-group input {
+            width: 60px;
+            text-align: center;
+        }
+
+    .btn-buy {
+        background: linear-gradient(90deg, #007bff, #0056b3);
+        border: none;
+        color: white;
+        padding: 12px 20px;
+        font-size: 1.1rem;
+        border-radius: 5px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: background 0.3s, box-shadow 0.3s;
+    }
+
+        .btn-buy:hover {
+            background: linear-gradient(90deg, #0056b3, #007bff);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        }
+</style>

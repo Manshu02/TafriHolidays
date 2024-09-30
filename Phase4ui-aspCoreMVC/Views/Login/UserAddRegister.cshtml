@@ -1,0 +1,76 @@
+﻿@model Phase4.Models.Users
+
+@{
+    ViewData["Title"] = "User Registration";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<form asp-action="UserRegister" asp-controller="Login" method="post" onsubmit="return validateUserForm()">
+    <div class="form-group">
+        <label asp-for="UserName" class="control-label"></label>
+        <input id="userName" asp-for="UserName" class="form-control" />
+        <span id="userNameError" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="UserContact" class="control-label">Contact</label>
+        <input id="userContact" asp-for="UserContact" class="form-control" />
+        <span id="userContactError" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="UserEmail" class="control-label">Email</label>
+        <input id="userEmail" asp-for="UserEmail" class="form-control" onchange="checkUserEmailExists()" />
+        <span id="userEmailError" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="UserPassword" class="control-label">Password</label>
+        <input id="userPassword" asp-for="UserPassword" type="password" class="form-control" />
+        <span id="userPasswordError" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <input type="submit" value="Register" class="btn btn-primary" />
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        function checkUserEmailExists() {
+            var email = document.getElementById('userEmail').value.trim();
+            var emailError = document.getElementById('userEmailError');
+            var registerButton = document.querySelector('input[type="submit"]');
+
+            // Clear previous error message
+            emailError.textContent = '';
+
+            if (email) {
+                fetch(`https://localhost:7252/Phase4/check-user-email?email=${encodeURIComponent(email)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.exists) {
+                            emailError.textContent = 'Email is already registered.';
+                            // Disable the register button
+                            registerButton.disabled = true;
+                        } else {
+                            // Enable the register button if email is not registered
+                            registerButton.disabled = false;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        emailError.textContent = 'Error checking email availability.';
+                        // Enable the register button in case of an error
+                        registerButton.disabled = false;
+                    });
+            } else {
+                // Enable the register button if email field is empty
+                registerButton.disabled = false;
+            }
+        }
+    </script>
+    <script src="~/js/userRegisterValidation.js"></script>
+}

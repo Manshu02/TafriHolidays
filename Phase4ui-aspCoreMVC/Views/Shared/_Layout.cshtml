@@ -1,0 +1,67 @@
+﻿@using System.Security.Claims
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Phase4</title>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/Phase4.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+</head>
+<body>
+    
+        @* Determine if the current page is Login or Register *@
+    @{
+        var isLoginOrRegister = Context.Request.Path.StartsWithSegments("/Login/LoginPage") ||
+            Context.Request.Path.StartsWithSegments("/User/Register") ||
+            Context.Request.Path.StartsWithSegments("/Admin/Register") ||
+            Context.Request.Path.StartsWithSegments("/Supplier/Register") ||
+            Context.Request.Path.StartsWithSegments("/Home/Index") ||
+            Context.Request.Path.StartsWithSegments("/Supplier/CheckLogin")||
+        Context.Request.Path.StartsWithSegments("/User/CheckLogin"); ;
+            
+        }
+
+        @* Render the header only if the current page is not Login or Register *@
+        @{ if (!isLoginOrRegister)
+        {
+            
+               
+                
+                 var userType = User.FindFirstValue("UserType");
+                
+                @if(userType == "admin")
+                {
+                    @await Html.PartialAsync("_AdminHeader")
+                }
+                else if (userType == "supplier")
+                {
+                    @await Html.PartialAsync("_SupplierHeader")
+                }
+                else if (userType == "user")
+                {
+                    @await Html.PartialAsync("_UserHeader")
+                }
+            
+        }
+        }
+   
+    <div class="container">
+
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+
+        @* Footer is intentionally left out for login and registration pages *@
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

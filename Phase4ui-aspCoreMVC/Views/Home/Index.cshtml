@@ -1,0 +1,61 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center mt-5">
+    <h2 class="mb-4">@ViewData["Title"]</h2>
+
+    <div class="mb-3">
+        <button onclick="location.href='@Url.Action("SupplierAddRegister", "Login")'" class="btn btn-primary btn-lg m-2">Supplier Registration</button>
+        <button onclick="location.href='@Url.Action("UserAddRegister", "Login")'" class="btn btn-primary btn-lg m-2">User Registration</button>
+        <button onclick="location.href='@Url.Action("AdminAddRegister", "Login")'" class="btn btn-primary btn-lg m-2">Admin Registration</button>
+    </div>
+
+    <div class="mt-4 d-flex align-items-center justify-content-center">
+        <span class="me-2">Already a member?</span>
+        <button onclick="location.href='@Url.Action("LoginPage", "Login")'" class="btn btn-secondary btn-lg">Login</button>
+    </div>
+</div>
+
+<style>
+    .text-center {
+        margin-top: 100px;
+    }
+
+    h2 {
+        color: #343a40;
+        font-weight: bold;
+    }
+
+    .btn-lg {
+        padding: 15px 30px;
+        font-size: 18px;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+
+    .btn-secondary {
+        background-color: #6c757d;
+        border-color: #6c757d;
+    }
+
+    .btn-info {
+        background-color: #17a2b8;
+        border-color: #17a2b8;
+    }
+
+    .btn:hover {
+        opacity: 0.8;
+    }
+
+    .mt-4 {
+        margin-top: 40px;
+    }
+
+    .me-2 {
+        margin-right: 0.5rem; /* Bootstrap spacing utility for margin-right */
+    }
+</style>

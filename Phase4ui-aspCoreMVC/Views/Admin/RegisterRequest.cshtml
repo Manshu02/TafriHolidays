@@ -1,0 +1,35 @@
+﻿@model List<Phase4.Models.Suppliers>
+
+@{
+    ViewData["Title"] = "Pending Supplier Registrations";
+}
+
+<h2>Pending Supplier Registrations</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Supplier Name</th>
+            <th>Contact</th>
+            <th>Company Name</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var supplier in Model)
+        {
+            <tr>
+                <td>@supplier.SupplierName</td>
+                <td>@supplier.SupplierContact</td>
+                <td>@supplier.CompanyName</td>
+
+                <td>
+                    <form method="post" asp-action="ApproveSupplier" asp-route-id="@supplier.SupplierID">
+                        <button type="submit" class="btn btn-success">Approve</button>
+                    </form>
+                   
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

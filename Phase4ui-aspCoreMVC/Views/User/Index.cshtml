@@ -1,0 +1,108 @@
+﻿@model IEnumerable<Phase4.Models.Users>
+
+@{
+    ViewData["Title"] = "Dashboard";
+    var userId = User.FindFirst("UserID")?.Value; // Assuming the claim type is "UserID"
+}
+
+<!-- jQuery (make sure it's loaded before DataTables) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- DataTables CSS -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+<!-- DataTables JS -->
+<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+
+<h2 class="text-center mt-4">@ViewData["Title"]</h2>
+
+<div class="card shadow-lg p-3 mb-5 bg-white rounded" style="max-width: 500px; margin: auto;">
+    <div class="card-body">
+        <h5 class="card-title">User Information</h5>
+        @foreach (var item in Model)
+        {
+            <p class="card-text"><strong>User ID:</strong> @userId</p>
+            <p class="card-text"><strong>Name:</strong> @item.UserName</p>
+            <p class="card-text"><strong>Contact:</strong> @item.UserContact</p>
+            <p class="card-text"><strong>Email:</strong> @item.UserEmail</p>
+            <button type="button" class="btn btn-primary transaction-history" data-userid="@userId">Show Transaction History</button>
+        }
+    </div>
+</div>
+
+<div id="transaction-history-container" class="mt-4" style="display: none;"></div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        var userId = '@userId';
+        const historyContainer = $('#transaction-history-container');
+
+        $('.transaction-history').on('click', function () {
+            if (historyContainer.is(':hidden')) {
+                fetch(`https://localhost:7252/Phase4/UserPurchasedPackages?userid=${userId}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        var historyHtml = '<table id="transactionTable" class="display table table-hover table-bordered table-striped">' +
+                            '<thead class="thead-dark"><tr>' +
+                            '<th>Package ID</th>' +
+                            '<th>Package Price</th>' +
+                            '<th>Count</th>' +
+                            '<th>Date</th>' +
+                            '<th>Flight Name</th>' +
+                            '<th>From</th>' +
+                            '<th>To</th>' +
+                            '<th>Flight Type</th>' +
+                            '<th>Accommodation Name</th>' +
+                            '<th>Accommodation Type</th>' +
+                            '<th>Accommodation Address</th>' +
+                            '<th>Special Services</th>' +
+                            '<th>Luxury</th>' +
+                            '</tr></thead><tbody>';
+
+                        data.forEach(item => {
+                            historyHtml += '<tr>' +
+                                (item.packageId ? `<td>${item.packageId}</td>` : '<td>-</td>') +
+                                (item.packagePrice ? `<td>${item.packagePrice}</td>` : '<td>-</td>') +
+                                (item.count ? `<td>${item.count}</td>` : '<td>-</td>') +
+                                (item.date ? `<td>${new Date(item.date).toLocaleDateString()}</td>` : '<td>-</td>') +
+                                (item.flightName ? `<td>${item.flightName}</td>` : '<td>-</td>') +
+                                (item.from ? `<td>${item.from}</td>` : '<td>-</td>') +
+                                (item.to ? `<td>${item.to}</td>` : '<td>-</td>') +
+                                (item.flightType ? `<td>${item.flightType}</td>` : '<td>-</td>') +
+                                (item.accName ? `<td>${item.accName}</td>` : '<td>-</td>') +
+                                (item.accType ? `<td>${item.accType}</td>` : '<td>-</td>') +
+                                (item.accAddress ? `<td>${item.accAddress}</td>` : '<td>-</td>') +
+                                (item.ssNames ? `<td>${item.ssNames}</td>` : '<td>-</td>') +
+                                (item.luxuary ? `<td>${item.luxuary}</td>` : '<td>-</td>') +
+                                '</tr>';
+                        });
+
+                        historyHtml += '</tbody></table>';
+                        historyContainer.html(historyHtml);
+                        historyContainer.show();
+                        $(this).text('Hide Transaction History');
+
+                        // Ensure DataTable is initialized after the table is rendered
+                        setTimeout(function () {
+                            $('#transactionTable').DataTable({
+                                "columnDefs": [
+                                    { "targets": 1, "orderable": true }, // Enable sorting for price column
+                                    { "targets": 6, "searchable": true }  // Enable search for 'To' destination
+                                ]
+                            });
+                        }, 100);  // Slight delay to ensure table exists
+                    })
+                    .catch(error => {
+                        alert('Failed to retrieve transaction history.');
+                        console.error('There was a problem with the fetch operation:', error);
+                    });
+            } else {
+                historyContainer.hide();
+                $(this).text('Show Transaction History');
+            }
+        });
+    });
+</script>

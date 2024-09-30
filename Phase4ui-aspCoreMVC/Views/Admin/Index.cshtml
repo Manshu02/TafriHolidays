@@ -1,0 +1,190 @@
+﻿@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+
+<!-- Load Google Charts -->
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<!-- Load Bootstrap CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+<script type="text/javascript">
+
+    document.addEventListener('DOMContentLoaded', function () {
+        fetchAdminDetails();
+        google.charts.load('current', { 'packages': ['corechart'] });
+        google.charts.setOnLoadCallback(drawCharts);
+
+    });
+
+    function fetchAdminDetails() {
+        const adminId = '@User.FindFirst("UserID").Value';  // Fetch AdminID from claims
+
+        fetch(`https://localhost:7252/Phase4/admindetail/${adminId}`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json'
+            }
+        })
+            .then(response => response.json())
+            .then(admin => {
+                console.log(admin)
+                 
+                document.getElementById('adminCard').innerHTML = `
+                    <div class="card">
+                        <div class="card-header">
+                            Admin Info
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">${admin.adminName}</h5>
+                            <p class="card-text">Contact: ${admin.adminContact}</p>
+                            <p class="card-text">Email: ${admin.adminEmail}</p>
+                        </div>
+                    </div>
+                `;
+            })
+            .catch(error => console.error('Error fetching admin data:', error));
+    }
+    
+    function drawCharts() {
+        drawProfitChart();
+        drawMonthlySummaryChart();
+        drawMonthlySummaryPricesChart();
+    }
+
+    function drawProfitChart() {
+        fetch('https://localhost:7252/Phase4/GetProfitData', {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json'
+            }
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok ' + response.statusText);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (!data || data.length === 0) {
+                    console.error('No data available.');
+                    return;
+                }
+                console.log('Profit Data:', data);
+                var chartData = new google.visualization.DataTable();
+                chartData.addColumn('string', 'Package ID');
+                chartData.addColumn('number', 'Profit');
+
+                data.forEach(item => {
+                    if (item.packageId !== undefined && item.profit !== undefined) {
+                        chartData.addRow([item.packageId.toString(), item.profit]);
+                    } else {
+                        console.error('Unexpected data format:', item);
+                    }
+                });
+
+                var options = {
+                    title: 'Profit per Package',
+                    hAxis: { title: 'Package ID' },
+                    vAxis: { title: 'Profit' }
+                };
+
+                var chart = new google.visualization.BarChart(document.getElementById('profit_chart'));
+                chart.draw(chartData, options);
+            })
+            .catch(error => console.error('Error fetching profit data:', error));
+    }
+
+    function drawMonthlySummaryChart() {
+        fetch('https://localhost:7252/Phase4/monthly-summary')
+            .then(response => response.json())
+            .then(data => {
+                console.log('Monthly Summary Data:', data);
+                const formattedData = new google.visualization.DataTable();
+                formattedData.addColumn('string', 'Month');
+                formattedData.addColumn('number', 'Revenue');
+
+                data.forEach(item => {
+                    const dateStr = `${item.year}-${item.month < 10 ? '0' + item.month : item.month}`;
+                    formattedData.addRow([dateStr, item.totalAdminPrice]);
+                });
+
+                const options = {
+                    title: 'Revenue per Month',
+                    hAxis: { title: 'Months' },
+                    vAxis: { title: 'Revenue' },
+                    curveType: 'function',
+                    legend: { position: 'bottom' }
+                };
+
+                const chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
+                chart.draw(formattedData, options);
+            })
+            .catch(error => console.error('Error fetching monthly summary data:', error));
+    }
+
+    function drawMonthlySummaryPricesChart() {
+        fetch('https://localhost:7252/Phase4/monthly-summary-prices')
+            .then(response => response.json())
+            .then(data => {
+                console.log('Monthly Summary Prices Data:', data);
+                const monthlySummary = data[0];
+                const packagePrice = monthlySummary.totalPackagePrice;
+                const profit = monthlySummary.profit;
+
+                const chartData = google.visualization.arrayToDataTable([
+                    ['Category', 'Amount'],
+                    ['Total Package Price', packagePrice],
+                    ['Profit', profit]
+                ]);
+
+                const options = {
+                    title: 'Total profit gained',
+                    is3D: true
+                };
+
+                const chart = new google.visualization.PieChart(document.getElementById('piechart'));
+                chart.draw(chartData, options);
+            })
+            .catch(error => console.error('Error fetching monthly summary prices data:', error));
+    }
+</script>
+
+<!-- Bootstrap Container -->
+<div id="adminCard" class="mb-4"></div>
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    Total Profit
+                </div>
+                <div class="card-body">
+                    <div id="piechart" style="width: 100%; height: 400px;"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    Monthly Summary
+                </div>
+                <div class="card-body">
+                    <div id="chart_div" style="width: 100%; height: 400px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    Profit per Package
+                </div>
+                <div class="card-body">
+                    <div id="profit_chart" style="width: 100%; height: 500px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

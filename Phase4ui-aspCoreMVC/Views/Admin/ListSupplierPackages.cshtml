@@ -1,0 +1,199 @@
+﻿@model IEnumerable<Phase4.Models.Packages>
+
+@{
+    ViewData["Title"] = "Supplier Packages";
+    int supplierId = ViewBag.SupplierId;
+}
+
+<h2 class="text-center my-4">Supplier Packages</h2>
+
+
+
+<div class="container">
+    <div class="row">
+        @foreach (var package in Model.Where(p => p.IsActive))
+        {
+            var cardBackground = package.Luxuary ? "lightgoldenrodyellow" : "lightgray";
+            var assignButtonId = "assignButton_" + package.PackageID;
+            var userIdFormId = "userIdForm_" + package.PackageID;
+            var adminPriceFormId = "adminPriceForm_" + package.PackageID;
+            var adminPriceButtonId = "adminPriceButton_" + package.PackageID;
+
+            <div class="col-md-4 mb-4">
+                <div class="card shadow-sm" style="background-color:@cardBackground;">
+                    <div class="card-body">
+                        <h5 class="card-title">Package ID: @(package.PackageID)</h5>
+                        <h3 class="card-title">@(!string.IsNullOrEmpty(package.FlightName) ? package.FlightName : "Not Included")</h3>
+                        <p class="card-text"><strong>From:</strong> @(!string.IsNullOrEmpty(package.From) ? package.From : "Not Included")</p>
+                        <p class="card-text"><strong>To:</strong> @(!string.IsNullOrEmpty(package.To) ? package.To : "Not Included")</p>
+                        <p class="card-text"><strong>Flight Type:</strong> @(!string.IsNullOrEmpty(package.FlightType) ? package.FlightType : "Not Included")</p>
+                        <p class="card-text"><strong>Accommodation:</strong> @(!string.IsNullOrEmpty(package.AccName) ? package.AccName : "Not Included")</p>
+                        <p class="card-text"><strong>SS Names:</strong> @(!string.IsNullOrEmpty(package.SSNames) ? package.SSNames : "Not Included")</p>
+                        <p class="card-text"><strong>Luxury:</strong> @(package.Luxuary ? "Yes" : "No")</p>
+                        <p class="card-text"><strong>Total Count:</strong> @(package.TotalCount > 0 ? package.TotalCount.ToString() : "Not Included")</p>
+                        <p class="card-text"><strong>Used Count:</strong> @(package.UsedCount > 0 ? package.UsedCount.ToString() : "Not Included")</p>
+                        <p class="card-text"><strong>Date:</strong> @(package.Dated != DateTime.MinValue ? package.Dated.ToString("MM/dd/yyyy") : "Not Included")</p>
+                        <p class="card-text"><strong>Price:</strong> @(package.PackagePrice > 0 ? "₹" + package.PackagePrice.ToString() : "Not Included")</p>
+                        <p class="card-text"><strong>Approved:</strong> @(package.IsApproved ? "Yes" : "No")</p>
+                        <p class="card-text"><strong>Active:</strong> @(package.IsActive ? "Yes" : "No")</p>
+                        <p class="card-text"><strong>Admin Price:₹</strong>@package.AdminPrice</p>
+
+                        <button id="@adminPriceButtonId" class="btn btn-info btn-block mb-2" onclick="toggleAdminPriceForm('@adminPriceFormId', '@adminPriceButtonId')">Add Company Price </button>
+
+                        <form asp-action="AdminPrice" method="get" id="@adminPriceFormId" class="mb-2" style="display:none;">
+                            <label for="adminPrice">Admin Price: </label>
+                            <input type="number" id="adminPrice" name="adminPrice" class="form-control mb-2" />
+                            <input type="hidden" name="supplierId" value="@supplierId" />
+                            <input type="hidden" name="packageId" value="@package.PackageID" />
+                            <button type="submit" class="btn btn-primary btn-block">Submit</button>
+                        </form>
+
+                        @if (package.IsApproved)
+                        {
+                            <button id="@assignButtonId" class="btn btn-warning btn-block mb-2" onclick="toggleUserIdForm('@userIdFormId', '@assignButtonId')">Assign to User</button>
+
+                            <form asp-action="AdminUserWishList" method="post" id="@userIdFormId" class="mb-2" style="display:none;">
+                                <label for="userId">UserID: </label>
+                                <input type="number" id="userId" name="userId" class="form-control mb-2" />
+                                <input type="hidden" name="supllierId" value="@package.SupplierID" />
+                                <input type="hidden" name="packageId" value="@package.PackageID" />
+                                <button type="submit" class="btn btn-primary btn-block">Submit</button>
+                            </form>
+                        }
+
+                        @if (!package.IsApproved)
+                        {
+                            <form asp-action="ApprovePackage" method="get">
+                                <input type="hidden" name="packageId" value="@package.PackageID" />
+                                <input type="hidden" name="supllierId" value="@package.SupplierID" />
+                                <button type="submit" class="btn btn-success btn-block">Make Public</button>
+                            </form>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    h2 {
+        font-family: 'Arial', sans-serif;
+        font-weight: bold;
+        color: #333;
+    }
+
+    .card {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 15px;
+        background-color: #fff;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+        .card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+
+    .card-title {
+        font-size: 1.1rem;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    .card-text {
+        font-size: 0.85rem;
+        margin-bottom: 8px;
+    }
+
+    .btn-block {
+        width: 100%;
+        font-size: 0.85rem;
+        padding: 8px;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+
+    .btn-success {
+        background-color: #28a745;
+        border-color: #28a745;
+    }
+
+    .btn-warning {
+        background-color: #ffc107;
+        border-color: #ffc107;
+    }
+
+    .btn-info {
+        background-color: #17a2b8;
+        border-color: #17a2b8;
+    }
+
+    .mb-2 {
+        margin-bottom: 10px;
+    }
+
+    .container {
+        max-width: 1000px;
+        margin: auto;
+    }
+
+    #adminPriceForm_ {
+        border: 1px solid #007bff;
+        padding: 10px;
+        border-radius: 5px;
+        background-color: #f8f9fa;
+    }
+
+    #userIdForm_ {
+        border: 1px solid #28a745;
+        padding: 10px;
+        border-radius: 5px;
+        background-color: #f8f9fa;
+    }
+
+    .alert {
+        margin-bottom: 20px;
+        font-size: 1rem;
+    }
+</style>
+
+<script>
+
+
+    document.addEventListener("DOMContentLoaded", function () {
+        var resultMessage = '@ViewBag.ResultMessage';
+        if (resultMessage) {
+            alert(resultMessage);
+        }
+    });
+    function toggleUserIdForm(formId, buttonId) {
+        var form = document.getElementById(formId);
+        var button = document.getElementById(buttonId);
+
+        if (form.style.display === "none") {
+            form.style.display = "block";
+            button.innerHTML = "Hide User Form";
+        } else {
+            form.style.display = "none";
+            button.innerHTML = "Assign to User";
+        }
+    }
+
+    function toggleAdminPriceForm(formId, buttonId) {
+        var form = document.getElementById(formId);
+        var button = document.getElementById(buttonId);
+
+        if (form.style.display === "none") {
+            form.style.display = "block";
+            button.innerHTML = "Close Form";
+        } else {
+            form.style.display = "none";
+            button.innerHTML = "Add Company Price";
+        }
+    }
+</script>

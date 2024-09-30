@@ -1,0 +1,6 @@
+@Phase4API_HostAddress = http://localhost:5216
+
+GET {{Phase4API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

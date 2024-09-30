@@ -1,0 +1,28 @@
+﻿@{
+    ViewBag.Title = "Login Unavailable";
+}
+
+<h2>You cannot log in yet!</h2>
+
+@if (ViewBag.TimeLeft != null)
+{
+    <p>Please wait for @ViewBag.TimeLeft before trying to log in again.</p>
+}
+else
+{
+    <p>Time left information is not available.</p>
+}
+
+<div class="logout-container">
+    <form asp-controller="Login" asp-action="Logout" method="post" class="d-inline">
+        <button type="submit" class="btn btn-danger">Logout</button>
+    </form>
+</div>
+
+<style>
+    .logout-container {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+    }
+</style>

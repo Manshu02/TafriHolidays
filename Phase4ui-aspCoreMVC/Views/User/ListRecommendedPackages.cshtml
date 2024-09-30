@@ -1,0 +1,205 @@
+﻿@model IEnumerable<Phase4.Models.PackageSpecificationViewModel>
+
+@{
+    ViewData["Title"] = "List of Packages";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<div class="row">
+    @foreach (var item in Model.Where(p => p.TotalCount > p.UsedCount))
+    {
+        var cardClass = item.Luxuary ? "card premium-card" : "card silver-card";
+        <div class="col-md-4 mb-4">
+            <div class="@cardClass package-card">
+                <form asp-action="AddToCart" method="post" class="add-to-cart-form">
+                    <input type="hidden" name="packageId" value="@item.PackageId" />
+                    <input type="hidden" name="userId" value="@ViewBag.UserId" />
+                    <button type="submit" class="btn btn-cart custom-button" title="Add to Cart">
+                        <span class="cart-icon">&#128722;</span> <!-- Alternative icon if FontAwesome is not available -->
+                    </button>
+                </form>
+                <div class="card-body">
+                    <h5 class="card-title">Package Details</h5>
+                    @if (!string.IsNullOrEmpty(item.FlightName))
+                    {
+                        <p><strong>Flight Name:</strong> @item.FlightName</p>
+                    }
+                    @if (!string.IsNullOrEmpty(item.From))
+                    {
+                        <p><strong>From:</strong> @item.From</p>
+                    }
+                    @if (!string.IsNullOrEmpty(item.To))
+                    {
+                        <p><strong>To:</strong> @item.To</p>
+                    }
+                    @if (!string.IsNullOrEmpty(item.FlightType))
+                    {
+                        <p><strong>Flight Type:</strong> @item.FlightType</p>
+                    }
+                    @if (!string.IsNullOrEmpty(item.AccName))
+                    {
+                        <p><strong>Accommodation Name:</strong> @item.AccName</p>
+                    }
+                    @if (!string.IsNullOrEmpty(item.AccType))
+                    {
+                        <p><strong>Accommodation Type:</strong> @item.AccType</p>
+                    }
+                    @if (!string.IsNullOrEmpty(item.AccAddress))
+                    {
+                        <p><strong>Accommodation Address:</strong> @item.AccAddress</p>
+                    }
+                    @if (!string.IsNullOrEmpty(item.SSNames))
+                    {
+                        <p><strong>Special Services:</strong> @item.SSNames</p>
+                    }
+                    <p><strong>Luxury:</strong> @(item.Luxuary ? "Yes" : "No")</p>
+                    <p><strong>Package Price:</strong> @item.AdminPrice</p>
+                    <p><strong>Available Count:</strong> @(item.TotalCount - item.UsedCount)</p>
+
+                    <div class="d-flex justify-content-between mt-3">
+                        <form asp-action="BuyPackage" method="post" class="buy-package-form">
+                            <input type="hidden" name="packageId" value="@item.PackageId" />
+                            <input type="hidden" name="userId" value="@ViewBag.UserId" />
+                            <input type="hidden" name="packagePrice" value="@item.PackagePrice" />
+                            <input type="hidden" name="adminPrice" value="@item.AdminPrice" />
+
+                            <div class="input-group" data-max-count="@(item.TotalCount - item.UsedCount)">
+                                <button type="button" class="btn btn-decrement custom-button">-</button>
+                                <input type="text" id="count-@item.PackageId" name="count" class="form-control form-control-sm text-center" value="1" readonly />
+                                <button type="button" class="btn btn-increment custom-button">+</button>
+                            </div>
+                            <button type="submit" class="btn btn-buy custom-button mt-2">Buy Package</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var message = "@ViewBag.Message";
+            if (message) {
+                alert(message);
+            }
+
+            document.querySelectorAll('.btn-increment').forEach(button => {
+                button.addEventListener('click', function () {
+                    var input = this.previousElementSibling;
+                    var maxCount = parseInt(this.closest('.input-group').getAttribute('data-max-count'));
+                    var currentValue = parseInt(input.value);
+                    if (currentValue < maxCount) {
+                        input.value = currentValue + 1;
+                    }
+                });
+            });
+
+            document.querySelectorAll('.btn-decrement').forEach(button => {
+                button.addEventListener('click', function () {
+                    var input = this.nextElementSibling;
+                    var currentValue = parseInt(input.value);
+                    if (currentValue > 1) {
+                        input.value = currentValue - 1;
+                    }
+                });
+            });
+        });
+    </script>
+}
+
+<style>
+    .package-card {
+        transition: transform 0.3s, box-shadow 0.3s;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+        .package-card:hover {
+            transform: translateY(-10px);
+        }
+
+    .custom-button {
+        background-color: #007bff;
+        border: none;
+        color: white;
+        transition: background-color 0.3s, transform 0.3s;
+        border-radius: 5px;
+    }
+
+        .custom-button:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+        }
+
+    .btn-cart {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background-color: transparent;
+        border: none;
+        font-size: 1.5rem;
+        color: #007bff;
+        padding: 0;
+        transition: color 0.3s;
+    }
+
+        .btn-cart:hover {
+            color: #0056b3;
+        }
+
+    .cart-icon {
+        font-size: 1.5rem;
+    }
+
+    .input-group {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .input-group .btn-decrement, .input-group .btn-increment {
+            background-color: #f0f0f0;
+            border: 1px solid #ddd;
+            color: #333;
+            font-size: 1.2rem;
+            height: 40px;
+            width: 40px;
+        }
+
+            .input-group .btn-decrement:hover, .input-group .btn-increment:hover {
+                background-color: #e0e0e0;
+                border-color: #ccc;
+            }
+
+        .input-group input {
+            width: 60px;
+            text-align: center;
+        }
+
+    .btn-buy {
+        background: linear-gradient(90deg, #007bff, #0056b3);
+        border: none;
+        color: white;
+        padding: 12px 20px;
+        font-size: 1.1rem;
+        border-radius: 5px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: background 0.3s, box-shadow 0.3s;
+    }
+
+        .btn-buy:hover {
+            background: linear-gradient(90deg, #0056b3, #007bff);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        }
+
+    .premium-card {
+        background-color: #fdf5e6; /* Light gold */
+    }
+
+    .silver-card {
+        background-color: #f0f0f0; /* Light silver */
+    }
+</style>

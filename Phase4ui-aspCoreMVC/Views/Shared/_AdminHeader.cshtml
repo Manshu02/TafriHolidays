@@ -1,0 +1,98 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Styled Header - Tafri Travs</title>
+
+    <!-- Load Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+    <style>
+        .custom-header {
+            background-color: #f8f9fa; /* Light background color */
+            box-shadow: 0 4px 2px -2px rgba(0, 0, 0, 0.1); /* Light shadow for depth */
+            padding: 10px 0;
+        }
+
+            .custom-header .navbar-brand {
+                font-size: 1.5rem;
+                font-weight: bold;
+                color: #007bff;
+                display: flex;
+                align-items: center;
+            }
+
+            .custom-header .navbar-nav .nav-link {
+                margin-right: 20px;
+                font-size: 1rem;
+                font-weight: 500;
+                color: #007bff;
+                transition: color 0.3s;
+            }
+
+                .custom-header .navbar-nav .nav-link:hover {
+                    color: #0056b3; /* Darker blue on hover */
+                }
+
+            .custom-header .navbar-toggler {
+                border-color: rgba(0, 0, 0, 0.1);
+            }
+
+            .custom-header img {
+                margin-right: 10px;
+                width: 40px;
+                height: 40px;
+            }
+    </style>
+</head>
+<body>
+
+    <header class="custom-header">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container-fluid d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center">
+                    <!-- Airplane Logo -->
+                    <img src="https://cdn-icons-png.flaticon.com/128/1358/1358770.png" alt="Airplane Logo" width="40" height="40" class="mr-2">
+
+                    <!-- Company Name -->
+                    <a class="navbar-brand font-weight-bold" href="/">Tafri Holidays</a>
+                </div>
+
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/Admin/RegisterRequest">Supplier Requests</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/Admin/GetRegSupplier">Approved Supplier</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/Login/Logout">Logout</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Load Bootstrap JS and dependencies -->
+    <!-- Load Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+
+    <!-- Popper.js (for Bootstrap tooltips and popovers) -->
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+
+    <!-- Bootstrap JS -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+
+</body>
+</html>

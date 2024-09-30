@@ -1,0 +1,310 @@
+﻿@model Phase4.Models.Packages
+
+@{
+    ViewBag.Title = "Register Package";
+    var todayDate = DateTime.Today.ToString("yyyy-MM-dd"); // Format today's date
+}
+
+<h2>Register Package</h2>
+
+<form id="registerForm" data-url="@Url.Action("PackageRegister", "Supplier")" method="post">
+    <div class="form-group">
+        <label asp-for="TotalCount"></label>
+        <input asp-for="TotalCount" class="form-control custom-input" id="TotalCount" type="number" max="50" />
+        <span id="TotalCountError" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="PackagePrice"></label>
+        <input asp-for="PackagePrice" class="form-control custom-input" id="PackagePrice" type="number" max="50000" />
+        <span id="PackagePriceError" class="text-danger"></span>
+    </div>
+
+    <!-- Date Input Field -->
+    <div class="form-group">
+        <label asp-for="Dated">Package Date</label>
+        <input asp-for="Dated" class="form-control custom-input" type="date" required value="@todayDate" />
+        <span asp-validation-for="Dated" class="text-danger"></span>
+    </div>
+
+    <!-- Luxury Toggle -->
+    <div class="form-group luxury-toggle-group">
+        <button type="button" class="btn btn-warning luxury-toggle-btn" id="luxuryToggle">Enable Luxury</button>
+        <input type="hidden" asp-for="Luxuary" id="Luxuary" value="false" />
+    </div>
+
+    <!-- Toggle Flight Details -->
+    <div class="form-group toggle-group">
+        <input type="checkbox" id="toggleFlightDetails" class="custom-checkbox" />
+        <label for="toggleFlightDetails" class="toggle-label">Include Flight Details</label>
+    </div>
+
+    <div id="flightDetails" class="details-group" style="display:none;">
+        <div class="form-group">
+            <label asp-for="FlightName"></label>
+            <input asp-for="FlightName" class="form-control custom-input" id="FlightName" />
+            <span asp-validation-for="FlightName" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="From">From</label>
+            <select asp-for="From" class="form-control custom-input" id="FromDropdown">
+                <option value="">Select a city</option>
+            </select>
+            <span asp-validation-for="From" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="To">To</label>
+            <select asp-for="To" class="form-control custom-input" id="ToDropdown">
+                <option value="">Select a city</option>
+            </select>
+            <span asp-validation-for="To" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="FlightType">Flight Type</label>
+            <select asp-for="FlightType" class="form-control custom-input" id="FlightType">
+                <option value="Economy">Economy</option>
+                <option value="Premium">Premium</option>
+            </select>
+            <span asp-validation-for="FlightType" class="text-danger"></span>
+        </div>
+    </div>
+
+    <!-- Toggle Accommodation Details -->
+    <div class="form-group toggle-group">
+        <input type="checkbox" id="toggleAccDetails" class="custom-checkbox" />
+        <label for="toggleAccDetails" class="toggle-label">Include Accommodation Details</label>
+    </div>
+
+    <div id="accDetails" class="details-group" style="display:none;">
+        <div class="form-group">
+            <label asp-for="AccName"></label>
+            <input asp-for="AccName" class="form-control custom-input" id="AccName" />
+            <span asp-validation-for="AccName" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="AccType">Accommodation Type</label>
+            <select asp-for="AccType" class="form-control custom-input" id="AccType">
+                <option value="Economy">Economy</option>
+                <option value="Premium">Premium</option>
+            </select>
+            <span asp-validation-for="AccType" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="AccAddress"></label>
+            <input asp-for="AccAddress" class="form-control custom-input" id="AccAddress" />
+            <span asp-validation-for="AccAddress" class="text-danger"></span>
+        </div>
+    </div>
+
+    <!-- Toggle SS Names Details -->
+    <div class="form-group toggle-group">
+        <input type="checkbox" id="toggleSSDetails" class="custom-checkbox" />
+        <label for="toggleSSDetails" class="toggle-label">Include SS Names</label>
+    </div>
+
+    <div id="ssDetails" class="details-group" style="display:none;">
+        <div class="form-group">
+            <label asp-for="SSNames"></label>
+            <input asp-for="SSNames" class="form-control custom-input" id="SSNames" />
+            <span asp-validation-for="SSNames" class="text-danger"></span>
+        </div>
+    </div>
+
+    <input type="hidden" asp-for="SupplierID" value="@Model.SupplierID" />
+
+    <button type="submit" class="btn btn-primary custom-submit-btn">Submit</button>
+</form>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Elements
+            var toggleFlightDetails = document.getElementById("toggleFlightDetails");
+            var flightDetails = document.getElementById("flightDetails");
+            var toggleAccDetails = document.getElementById("toggleAccDetails");
+            var accDetails = document.getElementById("accDetails");
+            var toggleSSDetails = document.getElementById("toggleSSDetails");
+            var ssDetails = document.getElementById("ssDetails");
+            var luxuryToggle = document.getElementById("luxuryToggle");
+            var luxuryField = document.getElementById("Luxuary");
+            var flightTypeField = document.getElementById("FlightType");
+            var accTypeField = document.getElementById("AccType");
+            var priceField = document.getElementById("PackagePrice");
+            var totalCountField = document.getElementById("TotalCount");
+            var totalCountError = document.getElementById("TotalCountError");
+            var packagePriceError = document.getElementById("PackagePriceError");
+
+            // Dropdowns
+            var fromDropdown = document.getElementById("FromDropdown");
+            var toDropdown = document.getElementById("ToDropdown");
+            var cities = [
+                "Mumbai", "Delhi", "Bengaluru", "Kolkata", "Chennai",
+                "Hyderabad", "Pune", "Ahmedabad", "Jaipur", "Lucknow",
+                // Add more cities as needed
+            ];
+
+            // Toggle visibility of fields
+            function toggleFieldVisibility() {
+                var flightFieldsRequired = toggleFlightDetails.checked;
+                var accFieldsRequired = toggleAccDetails.checked;
+                var ssFieldsRequired = toggleSSDetails.checked;
+
+                flightDetails.style.display = flightFieldsRequired ? "block" : "none";
+                accDetails.style.display = accFieldsRequired ? "block" : "none";
+                ssDetails.style.display = ssFieldsRequired ? "block" : "none";
+
+                document.getElementById("FlightName").required = flightFieldsRequired;
+                fromDropdown.required = flightFieldsRequired;
+                toDropdown.required = flightFieldsRequired;
+                flightTypeField.required = flightFieldsRequired;
+
+                document.getElementById("AccName").required = accFieldsRequired;
+                accTypeField.required = accFieldsRequired;
+                document.getElementById("AccAddress").required = accFieldsRequired;
+
+                document.getElementById("SSNames").required = ssFieldsRequired;
+            }
+
+            // Initialize luxury toggle
+            luxuryToggle.addEventListener("click", function () {
+                var isLuxuryEnabled = luxuryField.value === "true";
+                luxuryField.value = isLuxuryEnabled ? "false" : "true";
+                luxuryToggle.textContent = isLuxuryEnabled ? "Enable Luxury" : "Disable Luxury";
+
+                if (!isLuxuryEnabled) {
+                    flightTypeField.value = "Premium";
+                    accTypeField.value = "Premium";
+
+                    var currentPrice = parseFloat(priceField.value) || 0;
+                    priceField.value = (currentPrice * 1.5).toFixed(2);
+                } else {
+                    flightTypeField.value = "Economy";
+                    accTypeField.value = "Economy";
+
+                    var originalPrice = parseFloat(priceField.value) / 1.5;
+                    priceField.value = originalPrice.toFixed(2);
+                }
+            });
+
+            // Populate dropdowns with cities
+            function populateCities() {
+                cities.forEach(function (city) {
+                    var fromOption = document.createElement("option");
+                    fromOption.value = city;
+                    fromOption.textContent = city;
+                    fromDropdown.appendChild(fromOption);
+
+                    var toOption = document.createElement("option");
+                    toOption.value = city;
+                    toOption.textContent = city;
+                    toDropdown.appendChild(toOption);
+                });
+            }
+
+            // Update 'To' dropdown options based on 'From' selection
+            function updateToDropdown() {
+                var selectedFrom = fromDropdown.value;
+                Array.from(toDropdown.options).forEach(function (option) {
+                    option.style.display = option.value === selectedFrom && fromDropdown.value !== "" ? "none" : "block";
+                });
+            }
+
+            // Initialize event listeners
+            toggleFlightDetails.addEventListener("change", toggleFieldVisibility);
+            toggleAccDetails.addEventListener("change", toggleFieldVisibility);
+            toggleSSDetails.addEventListener("change", toggleFieldVisibility);
+            fromDropdown.addEventListener("change", updateToDropdown);
+            toDropdown.addEventListener("change", function () {
+                // Update visibility of options in the "From" dropdown
+                updateToDropdown();
+            });
+
+            // Initialize visibility and required fields on page load
+            toggleFieldVisibility();
+            populateCities();
+
+            // Form submission with validation
+            document.getElementById("registerForm").addEventListener("submit", function (event) {
+                event.preventDefault(); // Prevent default form submission
+
+                var form = event.target;
+                var formData = new FormData(form);
+
+                // Clear previous errors
+                totalCountError.textContent = "";
+                packagePriceError.textContent = "";
+
+                var totalCount = parseInt(formData.get("TotalCount")) || 0;
+                var packagePrice = parseFloat(formData.get("PackagePrice")) || 0;
+
+                // Validate fields
+                var valid = true;
+                if (totalCount === 0) {
+                    totalCountError.textContent = "Total Count must be greater than 0.";
+                    valid = false;
+                } else if (totalCount > 50) {
+                    totalCountError.textContent = "Total Count cannot be more than 50.";
+                    valid = false;
+                }
+
+                if (packagePrice === 0) {
+                    packagePriceError.textContent = "Package Price must be greater than 0.";
+                    valid = false;
+                } else if (packagePrice > 50000) {
+                    packagePriceError.textContent = "Package Price cannot be more than 50,000.";
+                    valid = false;
+                }
+
+                if (!valid) {
+                    return; // Prevent form submission if validation fails
+                }
+
+                // Convert FormData to a Package object
+                var package = {
+                    TotalCount: formData.get("TotalCount"),
+                    PackagePrice: formData.get("PackagePrice"),
+                    Dated: formData.get("Dated"), // Adding the date field
+                    FlightName: document.getElementById("toggleFlightDetails").checked ? formData.get("FlightName") : '',
+                    From: document.getElementById("toggleFlightDetails").checked ? formData.get("From") : '',
+                    To: document.getElementById("toggleFlightDetails").checked ? formData.get("To") : '',
+                    FlightType: document.getElementById("toggleFlightDetails").checked ? formData.get("FlightType") : '',
+                    AccName: document.getElementById("toggleAccDetails").checked ? formData.get("AccName") : '',
+                    AccType: document.getElementById("toggleAccDetails").checked ? formData.get("AccType") : '',
+                    AccAddress: document.getElementById("toggleAccDetails").checked ? formData.get("AccAddress") : '',
+                    SSNames: document.getElementById("toggleSSDetails").checked ? formData.get("SSNames") : '',
+                    SupplierID: formData.get("SupplierID"),
+                    Luxuary: document.getElementById("Luxuary").value === "true"
+                };
+
+                // Fetch API request
+                fetch("https://localhost:7252/Phase4/setpackage", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(package)
+                })
+                    .then(response => response.text())
+                    .then(result => {
+                        if (result === "Package registered") {
+                            alert("Package registered successfully!");
+                            form.reset();
+                            // Clear dropdowns and errors
+                            fromDropdown.selectedIndex = 0;
+                            toDropdown.selectedIndex = 0;
+                            totalCountError.textContent = "";
+                            packagePriceError.textContent = "";
+                        } else {
+                            alert("Error registering package: " + result.message);
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+            });
+        });
+    </script>
+}

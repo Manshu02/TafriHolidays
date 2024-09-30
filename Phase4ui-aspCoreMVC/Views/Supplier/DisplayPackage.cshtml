@@ -1,0 +1,163 @@
+﻿@model int
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Packages</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .premium-card {
+            background-color: #f8f5e1; /* Light gold background for premium cards */
+        }
+
+        .non-premium-card {
+            background-color: #f2f2f2; /* Light silver background for non-premium cards */
+        }
+
+        .card {
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            position: relative; /* Added for positioning the green tick */
+        }
+
+            .card:hover {
+                transform: scale(1.02);
+                box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+
+        .card-text {
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .green-tick {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 24px;
+            height: 24px;
+            background-color: #d4edda; /* Light green background */
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #c3e6cb;
+        }
+
+            .green-tick::before {
+                content: '✔'; /* Checkmark symbol */
+                font-size: 18px;
+                color: #155724; /* Dark green color */
+            }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <p id="packageCount" class="text-center fw-bold fs-4 text-primary"></p>
+        <div id="packages-container" class="row gy-4"></div>
+    </div>
+
+    <script>
+        const modelValue = '@Model';
+        document.addEventListener("DOMContentLoaded", function () {
+            const supplierId = modelValue;
+
+            fetch(`https://localhost:7252/Phase4/getpackages/${supplierId}`)
+                .then(response => response.json())
+                .then(data => {
+                    const container = document.getElementById('packages-container');
+                    const packageCount = document.getElementById('packageCount');
+
+                    // Display the package count
+                    packageCount.textContent = `Total Packages: ${data.length}`;
+
+                    // Loop through the packages and create Bootstrap cards
+                    data.forEach(package => {
+                        const packageDiv = document.createElement('div');
+                        packageDiv.className = 'col-md-4';
+
+                        // Determine if the package is premium
+                        const isPremium = package.flightType === 'Premium';
+                        // Determine if the package is approved
+                        const isApproved = package.isApproved;
+                        // Determine if the package is active
+                        const isActive = package.isActive;
+                        // Determine if usedCount is 0
+                        const canDeactivate = package.usedCount === 0;
+
+                        packageDiv.innerHTML = `
+                                            <div class="card h-100 ${isPremium ? 'premium-card' : 'non-premium-card'}">
+                                                ${isApproved ? '<div class="green-tick"></div>' : ''}
+                                                <div class="card-body">
+                                                    <h5 class="card-title">Package ID: ${package.packageID || 'Not Included'}</h5>
+                                                    <p class="card-text"><strong>Flight Name:</strong> ${package.flightName || 'Not Included'}</p>
+                                                    <p class="card-text"><strong>From:</strong> ${package.from || 'Not Included'}</p>
+                                                    <p class="card-text"><strong>To:</strong> ${package.to || 'Not Included'}</p>
+                                                    <p class="card-text"><strong>Flight Type:</strong> ${package.flightType || 'Not Included'}</p>
+                                                    <p class="card-text"><strong>Accommodation Name:</strong> ${package.accName || 'Not Included'}</p>
+                                                    <p class="card-text"><strong>Accommodation Type:</strong> ${package.accType || 'Not Included'}</p>
+                                                    <p class="card-text"><strong>Accommodation Address:</strong> ${package.accAddress || 'Not Included'}</p>
+                                                    <p class="card-text"><strong>Sightseeing Names:</strong> ${package.ssNames || 'Not Included'}</p>
+                                                    <p class="card-text"><strong>Package Date:</strong> ${package.dated ? new Date(package.dated).toLocaleDateString() : 'Not Included'}</p>
+                                                    <p class="card-text"><strong>Total Count:</strong> ${package.totalCount || 'Not Included'}</p>
+                                                    <p class="card-text"><strong>Used Count:</strong> ${package.usedCount !== 0 ? (package.usedCount || 'Not Included') : '0'}</p>
+                                                    <p class="card-text"><strong>Package Price:</strong> ₹${package.packagePrice || 'Not Included'}</p>
+                                                    <p class="card-text"><strong>Is Approved:</strong> ${package.isApproved ? 'Yes' : 'No'}</p>
+                                                    <p class="card-text"><strong>Is Active:</strong> ${package.isActive ? 'Yes' : 'No'}</p>
+                                                    <button class="btn ${isActive ? 'btn-danger' : 'btn-success'}" ${!canDeactivate && isActive ? 'disabled' : ''}
+                                                    onclick="toggleActivation('${package.packageID}', ${isActive}, ${canDeactivate})">
+                                                        ${isActive ? 'Deactivate' : 'Activate'}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        `;
+
+                        container.appendChild(packageDiv);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching packages:', error);
+                });
+        });
+
+        function toggleActivation(packageId, isActive, canDeactivate) {
+            if (!canDeactivate && isActive) {
+                alert('Cannot deactivate a package with used count greater than 0.');
+                return;
+            }
+
+            const action = isActive ? 'deactivate' : 'activate';
+
+            fetch(`https://localhost:7252/Phase4/updatepackage/${packageId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ action })
+            })
+                .then(response => {
+                    if (response.ok) {
+                        location.reload(); // Reload the page to reflect changes
+                    } else {
+                        throw new Error('Error in updating package status');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
+    </script>
+</body>
+</html>

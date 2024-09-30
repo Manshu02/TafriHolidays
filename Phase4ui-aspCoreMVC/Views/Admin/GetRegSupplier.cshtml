@@ -1,0 +1,106 @@
+﻿@model IEnumerable<Phase4.Models.Suppliers>
+
+@{
+    ViewData["Title"] = "Registered Suppliers";
+}
+
+<h2 class="text-center my-4">Registered Suppliers</h2>
+
+<div class="container">
+    <table class="table table-hover shadow-lg rounded">
+        <thead class="thead-custom">
+            <tr>
+                <th>Supplier Name</th>
+                <th>Company Name</th>
+                <th>Company Address</th>
+                <th>Supplier Contact</th>
+                <th class="text-center">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var supplier in Model)
+            {
+                <tr class="align-middle">
+                    <td>@supplier.SupplierName</td>
+                    <td>@supplier.CompanyName</td>
+                    <td>@supplier.CompanyAddress</td>
+                    <td>@supplier.SupplierContact</td>
+                    <td class="text-center">
+                        <div class="btn-group" role="group">
+                            <form asp-action="DisapproveSupplier" method="get" class="d-inline">
+                                <input type="hidden" name="supplierId" value="@supplier.SupplierID" />
+                                <button type="submit" class="btn btn-danger btn-sm mx-1">Remove Contract</button>
+                            </form>
+                            <form asp-action="ListSupplierPackages" method="get" class="d-inline">
+                                <input type="hidden" name="supplierId" value="@supplier.SupplierID" />
+                                <button type="submit" class="btn btn-info btn-sm mx-1">View Packages</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<style>
+    h2 {
+        font-family: 'Arial', sans-serif;
+        font-weight: bold;
+        color: #333;
+    }
+
+    table {
+        background-color: #f9f9f9;
+    }
+
+    th, td {
+        padding: 15px;
+        text-align: left;
+    }
+
+    /* Custom table header styling */
+    .thead-custom {
+        background-color: #0069d9;
+        color: white;
+        font-size: 18px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+        .thead-custom th {
+            padding: 20px;
+            font-weight: bold;
+        }
+
+    tr:nth-child(even) {
+        background-color: #f2f2f2;
+    }
+
+    .btn-group .btn {
+        transition: background-color 0.3s ease-in-out;
+    }
+
+        .btn-group .btn:hover {
+            background-color: #0056b3;
+        }
+
+    .btn-danger {
+        background-color: #dc3545;
+        border-color: #dc3545;
+    }
+
+    .btn-info {
+        background-color: #17a2b8;
+        border-color: #17a2b8;
+    }
+
+    /* Additional styling for table visibility */
+    th {
+        border-bottom: 2px solid #ddd;
+    }
+
+    td {
+        vertical-align: middle;
+    }
+</style>

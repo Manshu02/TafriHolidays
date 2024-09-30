@@ -1,0 +1,235 @@
+﻿@{
+    ViewData["Title"] = "Monthly Package Prices";
+    var supplierId = ViewBag.SupplierID;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+
+    <style>
+        .card {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        .card-header {
+            font-weight: bold;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .card-body h5 {
+            font-size: 1.5rem;
+            margin: 0;
+        }
+
+        .bg-warning {
+            background-color: #f0ad4e !important;
+        }
+
+        .bg-success {
+            background-color: #5cb85c !important;
+        }
+
+        .bg-primary {
+            background-color: #337ab7 !important;
+        }
+
+        .chart-card {
+            margin-top: 30px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+
+        .card-header {
+            font-size: 1rem;
+            padding: 0.75rem 1.25rem;
+        }
+
+        .card-body h5 {
+            font-size: 1.25rem;
+        }
+    </style>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var supplierId = "@supplierId";
+
+            if (supplierId) {
+                // Fetch supplier details
+                fetch(`https://localhost:7252/Phase4/suppliersinfo/${supplierId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById("supplier-name").textContent = data.supplierName;
+                        document.getElementById("company-name").textContent = data.companyName;
+                        document.getElementById("supplier-email").textContent = data.supplierEmail;
+                        document.getElementById("supplier-contact").textContent = data.supplierContact;
+                    })
+                    .catch(error => console.error('Error fetching supplier data:', error));
+
+                // Fetch package counts
+                fetch(`https://localhost:7252/Phase4/supplier-package-counts/${supplierId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById("total-packages").textContent = data.totalPackages;
+                        document.getElementById("active-packages").textContent = data.activePackages;
+                        document.getElementById("approved-packages").textContent = data.approvedPackages;
+                    })
+                    .catch(error => console.error('Error fetching package counts:', error));
+            }
+
+            // Load Google Charts
+            google.charts.load('current', { packages: ['corechart'] });
+            google.charts.setOnLoadCallback(function () {
+                drawRevenueChart(supplierId);
+                drawPackagePriceChart(supplierId);
+            });
+        });
+
+        function drawRevenueChart(supplierId) {
+            fetch(`https://localhost:7252/Phase4/supplier-monthly-summary/${supplierId}`)
+                .then(response => response.json())
+                .then(data => {
+                    const formattedData = new google.visualization.DataTable();
+                    formattedData.addColumn('string', 'Month');
+                    formattedData.addColumn('number', 'Revenue');
+
+                    data.forEach(item => {
+                        const dateStr = `${item.year}-${item.month < 10 ? '0' + item.month : item.month}`;
+                        formattedData.addRow([dateStr, item.totalPackagePrice]);
+                    });
+
+                    const options = {
+                        title: 'Revenue per Month',
+                        hAxis: { title: 'Months' },
+                        vAxis: { title: 'Revenue' },
+                        curveType: 'function',
+                        legend: { position: 'bottom' }
+                    };
+
+                    const chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
+                    chart.draw(formattedData, options);
+                })
+                .catch(error => console.error('Error fetching revenue data:', error));
+        }
+
+        function drawPackagePriceChart(supplierId) {
+            fetch(`https://localhost:7252/Phase4/total-package-price/${supplierId}`)
+                .then(response => response.json())
+                .then(data => {
+                    const formattedData = new google.visualization.DataTable();
+                    formattedData.addColumn('string', 'Package ID');
+                    formattedData.addColumn('number', 'Total Price');
+
+                    data.forEach(item => {
+                        formattedData.addRow([item.packageId.toString(), item.totalPrice]);
+                    });
+
+                    const options = {
+                        title: 'Total Package Price per Package ID',
+                        hAxis: { title: 'Package ID' },
+                        vAxis: { title: 'Total Price' }
+                    };
+
+                    const chart = new google.visualization.BarChart(document.getElementById('package_price_chart'));
+                    chart.draw(formattedData, options);
+                })
+                .catch(error => console.error('Error fetching package price data:', error));
+        }
+
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center my-4">@ViewData["Title"]</h1>
+
+        <div class="row">
+            <!-- Supplier Info Card -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header text-center bg-info text-white">
+                        Supplier Information
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title text-center" id="supplier-name">Loading...</h5>
+                        <p class="card-text"><strong>Company Name:</strong> <span id="company-name">Loading...</span></p>
+                        <p class="card-text"><strong>Email:</strong> <span id="supplier-email">Loading...</span></p>
+                        <p class="card-text"><strong>Contact:</strong> <span id="supplier-contact">Loading...</span></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Package Counts Card -->
+            <div class="col-md-6">
+                <div class="row">
+                    <!-- Total Packages -->
+                    <div class="col-md-4 d-flex">
+                        <div class="card text-center w-100">
+                            <div class="card-header bg-warning text-white">
+                                Total Packages
+                            </div>
+                            <div class="card-body">
+                                <h5 id="total-packages">Loading...</h5>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Active Packages -->
+                    <div class="col-md-4 d-flex">
+                        <div class="card text-center w-100">
+                            <div class="card-header bg-success text-white">
+                                Active Packages
+                            </div>
+                            <div class="card-body">
+                                <h5 id="active-packages">Loading...</h5>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Approved Packages -->
+                    <div class="col-md-4 d-flex">
+                        <div class="card text-center w-100">
+                            <div class="card-header bg-primary text-white">
+                                Approved Packages
+                            </div>
+                            <div class="card-body">
+                                <h5 id="approved-packages">Loading...</h5>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="row">
+            <!-- Revenue Chart -->
+            <div class="col-md-6 chart-card">
+                <div class="card">
+                    <div class="card-header bg-info text-white text-center">Monthly Revenue</div>
+                    <div class="card-body">
+                        <div id="chart_div" style="width: 100%; height: 400px;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Package Price Chart -->
+            <div class="col-md-6 chart-card">
+                <div class="card">
+                    <div class="card-header bg-info text-white text-center">Total Package Price per Package</div>
+                    <div class="card-body">
+                        <div id="package_price_chart" style="width: 100%; height: 400px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

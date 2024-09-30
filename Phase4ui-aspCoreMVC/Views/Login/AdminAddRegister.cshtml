@@ -1,0 +1,97 @@
+﻿@model Phase4.Models.Admins
+
+@{
+    ViewData["Title"] = "Admin Registration";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<div id="pinSection">
+    <div class="form-group">
+        <label for="pinInput">Enter Security Pin</label>
+        <input type="password" id="pinInput" class="form-control" />
+        <span id="pinError" class="text-danger" style="display:none;">Incorrect pin. Please try again.</span>
+    </div>
+    <button type="button" class="btn btn-primary" onclick="validatePin()">Submit Pin</button>
+    <button type="button" class="btn btn-secondary" onclick="window.location.href='@Url.Action("Index", "Home")'">Go Back</button>
+</div>
+
+<form id="registrationForm" asp-action="AdminRegister" asp-controller="Login" method="post" style="display:none;">
+    <div class="form-group">
+        <label asp-for="AdminName" class="control-label"></label>
+        <input id="adminName" asp-for="AdminName" class="form-control" />
+        <span id="adminNameError" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="AdminContact" class="control-label"></label>
+        <input id="adminContact" asp-for="AdminContact" class="form-control" />
+        <span id="adminContactError" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="AdminEmail" class="control-label"></label>
+        <input id="adminEmail" asp-for="AdminEmail" class="form-control" onchange="checkAdminEmailExists()" />
+        <span id="adminEmailError" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="AdminPassword" class="control-label"></label>
+        <input id="adminPassword" asp-for="AdminPassword" class="form-control" type="password" />
+        <span id="adminPasswordError" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary" onclick="return validateForm()">Register</button>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/adminRegisterValidation.js"></script>
+    <script>
+        function validatePin() {
+            var correctPin = "1234"; // Set your fixed pin here
+            var enteredPin = document.getElementById("pinInput").value;
+
+            if (enteredPin === correctPin) {
+                document.getElementById("pinSection").style.display = "none";
+                document.getElementById("registrationForm").style.display = "block";
+            } else {
+                document.getElementById("pinError").style.display = "block";
+            }
+        }
+
+        function checkAdminEmailExists() {
+            var email = document.getElementById('adminEmail').value.trim();
+            var emailError = document.getElementById('adminEmailError');
+            var registerButton = document.querySelector('button[type="submit"]');
+
+            // Clear previous error message
+            emailError.textContent = '';
+
+            if (email) {
+                fetch(`https://localhost:7252/Phase4/check-admin-email?email=${encodeURIComponent(email)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.exists) {
+                            emailError.textContent = 'Email is already registered.';
+                            // Disable the register button
+                            registerButton.disabled = true;
+                        } else {
+                            // Enable the register button if email is not registered
+                            registerButton.disabled = false;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        emailError.textContent = 'Error checking email availability.';
+                        // Enable the register button in case of an error
+                        registerButton.disabled = false;
+                    });
+            } else {
+                // Enable the register button if email field is empty
+                registerButton.disabled = false;
+            }
+        }
+    </script>
+    <script src="~/js/validation.js"></script>
+}

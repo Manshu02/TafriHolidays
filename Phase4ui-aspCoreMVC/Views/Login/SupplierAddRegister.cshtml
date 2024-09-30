@@ -1,0 +1,85 @@
+﻿@model Phase4.Models.Suppliers
+
+@{
+    ViewData["Title"] = "Supplier Registration";
+}
+
+<h2>Supplier Registration</h2>
+
+<form id="supplierForm" asp-action="SupplierRegister" asp-controller="Login" method="post">
+    <div class="form-group">
+        <label asp-for="SupplierName" class="control-label"></label>
+        <input id="supplierName" name="SupplierName" class="form-control" />
+        <span id="supplierNameError" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="SupplierContact" class="control-label"></label>
+        <input id="supplierContact" name="SupplierContact" class="form-control" />
+        <span id="supplierContactError" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="CompanyName" class="control-label"></label>
+        <input id="companyName" name="CompanyName" class="form-control" />
+        <span id="companyNameError" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="CompanyAddress" class="control-label">Company Address</label>
+        <input id="companyAddress" name="CompanyAddress" class="form-control" />
+        <span id="companyAddressError" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="SupplierEmail" class="control-label"></label>
+        <input id="supplierEmail" name="SupplierEmail" class="form-control" onchange="checkEmailExists()" />
+        <span id="supplierEmailError" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="SupplierPassword" class="control-label"></label>
+        <input id="supplierPassword" name="SupplierPassword" class="form-control" type="password" />
+        <span id="supplierPasswordError" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Register</button>
+</form>
+
+
+   <script>
+    function checkEmailExists() {
+        var email = document.getElementById('supplierEmail').value.trim();
+        var emailError = document.getElementById('supplierEmailError');
+        var registerButton = document.querySelector('button[type="submit"]');
+
+        // Clear previous error message
+        emailError.textContent = '';
+
+        if (email) {
+            fetch(`https://localhost:7252/Phase4/check-email?email=${encodeURIComponent(email)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.exists) {
+                        emailError.textContent = 'Email is already registered.';
+                        // Disable the register button
+                        registerButton.disabled = true;
+                    } else {
+                        // Enable the register button if email is not registered
+                        registerButton.disabled = false;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    emailError.textContent = 'Error checking email availability.';
+                    // Enable the register button in case of an error
+                    registerButton.disabled = false;
+                });
+        } else {
+            // Enable the register button if email field is empty
+            registerButton.disabled = false;
+        }
+    }
+</script>
+
+<script src="~/js/validation.js"></script>

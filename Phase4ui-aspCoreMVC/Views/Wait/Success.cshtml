@@ -1,0 +1,22 @@
+﻿@model string
+
+@{
+    ViewData["Title"] = "Success"; // Example title, adjust as needed
+}
+
+<h1>@Model</h1>
+
+<!-- Logout Button -->
+<div class="logout-container">
+    <form asp-controller="Login" asp-action="Logout" method="post" class="d-inline">
+        <button type="submit" class="btn btn-danger">Logout</button>
+    </form>
+</div>
+
+<style>
+    .logout-container {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+    }
+</style>
